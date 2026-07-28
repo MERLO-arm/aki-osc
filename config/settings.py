@@ -18,11 +18,12 @@ class PipelineSettings(BaseSettings):
     sample_rate: int = Field(default=16000, description="Taux d'échantillonnage audio cible (Hz)")
     channels: int = Field(default=1, description="Nombre de canaux audio cible (1 = mono)")
     min_silence_len: int = Field(default=500, description="Longueur minimale de silence pour le découpage (ms)")
-    silence_thresh: int = Field(default=-40, description="Seuil de silence en dBFS")
+    silence_threshold_dbfs: int = Field(default=-60, description="Seuil de silence en dBFS")
+    use_rms_split: bool = Field(default=True, description="Utiliser une méthode hybride de découpage (librosa + pydub)")
     vad_mode: int = Field(default=3, description="Mode d'agressivité WebRTC VAD (0 à 3)")
     min_snr_db: float = Field(default=5.0, description="Rapport signal/bruit minimal (dB)")
-    min_audio_duration: float = Field(default=0.5, description="Durée minimale d'un segment audio (secondes)")
-    max_audio_duration: float = Field(default=20.0, description="Durée maximale d'un segment audio (secondes)")
+    min_segment_duration: float = Field(default=2.0, description="Durée minimale d'un segment audio (secondes)")
+    max_segment_duration: float = Field(default=25.0, description="Durée maximale d'un segment audio (secondes)")
     enable_yamnet: bool = Field(default=True, description="Activer la détection de musique YAMNet si TensorFlow est présent")
 
     # Paramètres Nettoyage Texte

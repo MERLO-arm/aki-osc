@@ -8,6 +8,7 @@ torchcodec>=0.1.0
 soundfile>=0.12.1
 pydub>=0.25.1
 webrtcvad>=2.0.10
+librosa>=0.10.0
 setuptools<70
 audioop-lts>=0.2.0
 numpy>=1.24.0

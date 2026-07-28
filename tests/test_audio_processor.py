@@ -90,3 +90,38 @@ class TestAudioProcessor:
 
         voiced_ratio = processor.vad_filter(silence_segment)
         assert voiced_ratio == 0.0
+
+    def test_process_audio_file_sine_wave(self, tmp_path, processor):
+        from pathlib import Path
+        # Générer un signal propre de 5 secondes : 3.5s de sinusoïde + 1.5s de silence
+        sr = 16000
+        t_sine = np.linspace(0, 3.5, int(sr * 3.5))
+        sine_samples = (np.sin(2 * np.pi * 440 * t_sine) * 20000).astype(np.int16)
+        silence_samples = np.zeros(int(sr * 1.5), dtype=np.int16)
+        samples = np.concatenate([sine_samples, silence_samples])
+        
+        audio_segment = AudioSegment(
+            data=samples.tobytes(),
+            sample_width=2,
+            frame_rate=sr,
+            channels=1
+        )
+        
+        # Réglage temporaire du SNR pour éviter tout rejet lié au bruit sur signal pur
+        original_min_snr = processor.min_snr_db
+        processor.min_snr_db = -5.0
+        try:
+            results = processor.process_audio_file(
+                audio_input=audio_segment,
+                raw_text="mbote na bino banso",
+                text_cleaner_fn=lambda x: x,
+                output_audio_dir=tmp_path,
+                speaker_id="test_speaker"
+            )
+        finally:
+            processor.min_snr_db = original_min_snr
+        
+        assert len(results) > 0
+        for res in results:
+            assert res["duration"] >= 2.0
+            assert Path(res["audio_filepath"]).exists()

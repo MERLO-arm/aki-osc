@@ -1,4 +1,4 @@
-"""Module de traitement et d'analyse audio pour le pipeline ASR Lingala."""
+"""Module de traitement et d'analyse audio pour le pipeline ASR Lingala. """
 import io
 import os
 import uuid
@@ -30,11 +30,12 @@ class AudioProcessor:
         sample_rate: int = 16000,
         channels: int = 1,
         min_silence_len: int = 500,
-        silence_thresh: int = -40,
+        silence_threshold_dbfs: int = -60,
+        use_rms_split: bool = True,
         vad_mode: int = 3,
         min_snr_db: float = 5.0,
-        min_audio_duration: float = 0.5,
-        max_audio_duration: float = 20.0,
+        min_segment_duration: float = 2.0,
+        max_segment_duration: float = 25.0,
         enable_yamnet: bool = True,
     ):
         """Initialise le processeur audio avec les paramètres configurés.
@@ -43,21 +44,24 @@ class AudioProcessor:
             sample_rate: Taux d'échantillonnage cible (Hz).
             channels: Canaux cibles (1 = mono).
             min_silence_len: Durée de silence minimale pour la segmentation (ms).
-            silence_thresh: Seuil de silence en dBFS.
+            silence_threshold_dbfs: Seuil de silence en dBFS.
+            use_rms_split: Activer le découpage hybride RMS.
             vad_mode: Mode WebRTC VAD (0 agressivité faible à 3 très agressif).
             min_snr_db: Rapport signal/bruit minimal (dB).
-            min_audio_duration: Durée minimale des segments autorisés (s).
-            max_audio_duration: Durée maximale des segments autorisés (s).
+            min_segment_duration: Durée minimale des segments autorisés (s).
+            max_segment_duration: Durée maximale des segments autorisés (s).
             enable_yamnet: Activer la détection de musique YAMNet si disponible.
         """
         self.sample_rate = sample_rate
         self.channels = channels
         self.min_silence_len = min_silence_len
-        self.silence_thresh = silence_thresh
+        self.silence_threshold_dbfs = silence_threshold_dbfs
+        self.use_rms_split = use_rms_split
         self.vad_mode = vad_mode
         self.min_snr_db = min_snr_db
-        self.min_audio_duration = min_audio_duration
-        self.max_audio_duration = max_audio_duration
+        self.min_segment_duration = min_segment_duration
+        self.max_segment_duration = max_segment_duration
+        self.enable_yamnet = enable_yamnet and TF_HUB_AVAILABLE
         self.enable_yamnet = enable_yamnet and TF_HUB_AVAILABLE
 
         # VAD Initialisation
@@ -222,7 +226,7 @@ class AudioProcessor:
             return False
 
     def split_audio(self, segment: AudioSegment) -> List[AudioSegment]:
-        """Découpe un segment audio en sous-segments au niveau des silences.
+        """Découpe un segment audio en sous-segments au niveau des silences (Legacy helper).
 
         Args:
             segment: Segment audio source.
@@ -234,8 +238,8 @@ class AudioProcessor:
             chunks = split_on_silence(
                 segment,
                 min_silence_len=self.min_silence_len,
-                silence_thresh=self.silence_thresh,
-                keep_silence=150,  # garde 150ms de marge de silence
+                silence_thresh=self.silence_threshold_dbfs,
+                keep_silence=150,
             )
             return chunks if chunks else [segment]
         except Exception as e:
@@ -273,42 +277,111 @@ class AudioProcessor:
             segment = self.convert_audio(audio_input)
             total_duration = len(segment) / 1000.0
 
-            # 3. Découpage éventuel par silence si le fichier est long (> 15s)
-            if total_duration > 15.0:
-                audio_chunks = self.split_audio(segment)
-            else:
-                audio_chunks = [segment]
+            # Extraction robuste de l'identifiant pour le logging
+            input_name = "raw_audio"
+            if isinstance(audio_input, (str, Path)):
+                input_name = Path(audio_input).name
+            elif isinstance(audio_input, dict) and "path" in audio_input:
+                input_name = Path(audio_input["path"]).name
 
-            # 4. Filtrage et sauvegarde de chaque morceau
+            logger.info(f"[{input_name}] Début du traitement - Durée du fichier source : {total_duration:.2f}s")
+
+            # Vérification de l'énergie RMS minimale
+            samples = np.array(segment.get_array_of_samples(), dtype=np.float32)
+            max_val = float(1 << (8 * segment.sample_width - 1))
+            samples_float = samples / max_val
+            rms = np.sqrt(np.mean(samples_float ** 2)) if len(samples_float) > 0 else 0.0
+
+            if rms < 0.001:
+                logger.warning(f"[{input_name}] Audio rejeté : trop silencieux (RMS = {rms:.5f} < 0.001)")
+                return []
+
+            # 3. Découpage :
+            audio_chunks = []
+            use_librosa = False
+
+            if self.use_rms_split:
+                try:
+                    import librosa
+                    intervals = librosa.effects.split(samples_float, top_db=20)
+                    librosa_chunks = []
+                    durations = []
+                    for start_idx, end_idx in intervals:
+                        start_ms = (start_idx / self.sample_rate) * 1000.0
+                        end_ms = (end_idx / self.sample_rate) * 1000.0
+                        dur = (end_ms - start_ms) / 1000.0
+                        librosa_chunks.append(segment[start_ms:end_ms])
+                        durations.append(dur)
+
+                    if not librosa_chunks:
+                        logger.info(f"[{input_name}] Librosa n'a trouvé aucun segment. Fallback vers pydub.")
+                    elif len(librosa_chunks) > 0 and (np.mean(durations) < 2.0 or sum(1 for d in durations if d < 2.0) / len(durations) > 0.5):
+                        logger.info(f"[{input_name}] Librosa a produit des segments trop courts (durée moyenne: {np.mean(durations):.2f}s). Fallback vers pydub.")
+                    else:
+                        audio_chunks = librosa_chunks
+                        use_librosa = True
+                        logger.debug(f"[{input_name}] Découpage Librosa réussi : {len(audio_chunks)} segments.")
+                except Exception as e:
+                    logger.warning(f"[{input_name}] Erreur lors du split librosa ({e}). Fallback vers pydub.")
+
+            if not use_librosa:
+                try:
+                    from pydub.silence import detect_nonsilent
+                    intervals = detect_nonsilent(
+                        segment,
+                        min_silence_len=self.min_silence_len,
+                        silence_thresh=self.silence_threshold_dbfs,
+                    )
+                    if intervals:
+                        audio_chunks = []
+                        for start_ms, end_ms in intervals:
+                            start_padded = max(0, start_ms - 150)
+                            end_padded = min(len(segment), end_ms + 150)
+                            audio_chunks.append(segment[start_padded:end_padded])
+                        logger.debug(f"[{input_name}] Découpage pydub réussi : {len(audio_chunks)} segments.")
+                    else:
+                        audio_chunks = [segment]
+                except Exception as e:
+                    logger.warning(f"[{input_name}] Erreur lors de detect_nonsilent pydub ({e}). Utilisation du segment entier.")
+                    audio_chunks = [segment]
+
+            # 4. Filtrer les segments par durée et qualité
             for chunk in audio_chunks:
                 duration = len(chunk) / 1000.0
-                if duration < self.min_audio_duration or duration > self.max_audio_duration:
+                segment_id = f"waxal_asr_{uuid.uuid4().hex}"
+
+                # Filtrer par durée (2s à 25s)
+                if duration < self.min_segment_duration or duration > self.max_segment_duration:
+                    logger.info(f"[{input_name}] Segment rejeté : durée {duration:.2f}s hors limites [{self.min_segment_duration}, {self.max_segment_duration}]")
                     continue
 
                 # Calcul du SNR
                 snr_db = self.compute_snr(chunk)
                 if snr_db < self.min_snr_db:
+                    logger.info(f"[{input_name}] Segment rejeté : SNR trop faible ({snr_db:.2f} dB < {self.min_snr_db} dB)")
                     continue
 
-                # VAD Filter (minimum 40% de trames de parole)
+                # VAD Filter
                 voiced_ratio = self.vad_filter(chunk)
                 if voiced_ratio < 0.35:
-                    continue
+                    if duration < 3.0:
+                        logger.info(f"[{input_name}] Segment rejeté : VAD faible ({voiced_ratio:.2f} < 0.35) et durée courte ({duration:.2f}s < 3.0s)")
+                        continue
+                    else:
+                        logger.warning(f"[{input_name}] Avertissement VAD : Segment {segment_id} conservé malgré un faible VAD ({voiced_ratio:.2f}) car sa durée ({duration:.2f}s) est >= 3.0s")
 
                 # Détection de musique (si configurée)
                 if self.detect_music(chunk):
+                    logger.info(f"[{input_name}] Segment rejeté : musique détectée")
                     continue
 
-                # Génération d'un nom de fichier unique UUID
-                segment_id = f"waxal_asr_{uuid.uuid4().hex}"
+                # Sauvegarde du segment
                 filename = f"{segment_id}.wav"
                 filepath = output_audio_dir / filename
-
-                # Enregistrement du fichier WAV PCM 16-bit
                 chunk.export(str(filepath), format="wav")
 
-                # Extraction des mots pour métadonnées
                 words = clean_text.split()
+                logger.info(f"[{input_name}] Segment accepté : ID {segment_id}, durée {duration:.2f}s, SNR {snr_db:.2f} dB, VAD {voiced_ratio:.2f}")
 
                 results.append(
                     {
