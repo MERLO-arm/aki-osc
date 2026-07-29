@@ -32,11 +32,12 @@ def _init_worker(settings_dict: Dict, audio_dir_str: str):
         "sample_rate": settings_dict["sample_rate"],
         "channels": settings_dict["channels"],
         "min_silence_len": settings_dict["min_silence_len"],
-        "silence_thresh": settings_dict["silence_thresh"],
+        "silence_threshold_dbfs": settings_dict["silence_threshold_dbfs"],
+        "use_rms_split": settings_dict["use_rms_split"],
         "vad_mode": settings_dict["vad_mode"],
         "min_snr_db": settings_dict["min_snr_db"],
-        "min_audio_duration": settings_dict["min_audio_duration"],
-        "max_audio_duration": settings_dict["max_audio_duration"],
+        "min_segment_duration": settings_dict["min_segment_duration"],
+        "max_segment_duration": settings_dict["max_segment_duration"],
         "enable_yamnet": settings_dict["enable_yamnet"],
     }
     _global_processor = AudioProcessor(**processor_kwargs)
@@ -215,7 +216,7 @@ class Pipeline:
                 self.save_checkpoint()
 
         logger.info("Traitement par lots terminé. Génération des splits et du manifest final...")
-        self._finalize_dataset()
+        self._finalize_dataset(sample_counter)
 
     def _write_batch_parquet(self, data: List[Dict], batch_idx: int) -> None:
         """Écrit une liste de métadonnées de segments dans un fichier Parquet temporaire."""
@@ -226,20 +227,28 @@ class Pipeline:
         df.to_parquet(batch_path, index=False)
         logger.info(f"Lot {batch_idx} sauvegardé: {len(df)} segments dans {batch_path.name}")
 
-    def _finalize_dataset(self) -> None:
+    def _finalize_dataset(self, total_processed: int) -> None:
         """Combine tous les lots Parquet, effectue le split Train/Val/Test et génère le manifest."""
         batch_files = list(self.batches_dir.glob("batch_*.parquet"))
         if not batch_files:
-            logger.warning("Aucune donnée nettoyée à finaliser.")
-            return
+            logger.critical("CRITICAL: Aucun lot Parquet trouvé dans le dossier temporaire. Aucun segment valide n'a été produit !")
+            raise ValueError("Aucun segment valide produit par le pipeline.")
 
         logger.info(f"Fusion de {len(batch_files)} fichiers de lots Parquet...")
         dfs = [pd.read_parquet(f) for f in batch_files]
         full_df = pd.concat(dfs, ignore_index=True)
 
         if full_df.empty:
-            logger.warning("Le DataFrame global fusionné est vide.")
-            return
+            logger.critical("CRITICAL: Le DataFrame global fusionné est vide. Aucun segment valide n'a été produit !")
+            raise ValueError("Aucun segment valide produit par le pipeline.")
+
+        # Vérification critique du rendement (yield)
+        n_total = len(full_df)
+        if total_processed > 0:
+            yield_ratio = n_total / total_processed
+            if yield_ratio < 0.05:
+                logger.critical(f"CRITICAL: Rendement de segments anormalement bas : {n_total} segments pour {total_processed} échantillons traités ({yield_ratio:.2%}).")
+                raise ValueError(f"Rendement de segments trop faible ({yield_ratio:.2%}). Pipeline interrompu pour inspection.")
 
         n_total = len(full_df)
 
