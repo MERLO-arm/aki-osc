@@ -241,19 +241,44 @@ class Pipeline:
             logger.warning("Le DataFrame global fusionné est vide.")
             return
 
-        # Mélange déterministe
-        np.random.seed(self.settings.seed)
-        shuffled_indices = np.random.permutation(len(full_df))
-        full_df = full_df.iloc[shuffled_indices].reset_index(drop=True)
-
-        # Calcul des séparations (Splits)
         n_total = len(full_df)
-        n_train = int(n_total * self.settings.train_ratio)
-        n_val = int(n_total * self.settings.val_ratio)
 
-        train_df = full_df.iloc[:n_train]
-        val_df = full_df.iloc[n_train : n_train + n_val]
-        test_df = full_df.iloc[n_train + n_val :]
+        # Partitionnement étanche par locuteur (Speaker-Disjoint Split) si disponible
+        has_speaker_info = (
+            "speaker_id" in full_df
+            and full_df["speaker_id"].nunique() > 1
+            and not (full_df["speaker_id"] == "unknown").all()
+        )
+
+        if has_speaker_info:
+            logger.info("Application d'un partitionnement étanche par locuteur (Speaker-Disjoint Split)...")
+            speakers = full_df["speaker_id"].unique()
+            np.random.seed(self.settings.seed)
+            np.random.shuffle(speakers)
+
+            n_speakers = len(speakers)
+            n_train_spk = max(1, int(n_speakers * self.settings.train_ratio))
+            n_val_spk = max(1, int(n_speakers * self.settings.val_ratio)) if n_speakers > 2 else 0
+
+            train_spks = set(speakers[:n_train_spk])
+            val_spks = set(speakers[n_train_spk : n_train_spk + n_val_spk])
+            test_spks = set(speakers[n_train_spk + n_val_spk :])
+
+            train_df = full_df[full_df["speaker_id"].isin(train_spks)].reset_index(drop=True)
+            val_df = full_df[full_df["speaker_id"].isin(val_spks)].reset_index(drop=True)
+            test_df = full_df[full_df["speaker_id"].isin(test_spks)].reset_index(drop=True)
+        else:
+            # Mélange déterministe simple (fallback si aucun locuteur identifié)
+            np.random.seed(self.settings.seed)
+            shuffled_indices = np.random.permutation(len(full_df))
+            full_df = full_df.iloc[shuffled_indices].reset_index(drop=True)
+
+            n_train = int(n_total * self.settings.train_ratio)
+            n_val = int(n_total * self.settings.val_ratio)
+
+            train_df = full_df.iloc[:n_train].reset_index(drop=True)
+            val_df = full_df.iloc[n_train : n_train + n_val].reset_index(drop=True)
+            test_df = full_df.iloc[n_train + n_val :].reset_index(drop=True)
 
         # Sauvegarde des splits Parquet
         train_path = self.output_dir / "train.parquet"

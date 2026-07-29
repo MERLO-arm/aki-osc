@@ -21,8 +21,11 @@ class PipelineSettings(BaseSettings):
     silence_thresh: int = Field(default=-40, description="Seuil de silence en dBFS")
     vad_mode: int = Field(default=3, description="Mode d'agressivité WebRTC VAD (0 à 3)")
     min_snr_db: float = Field(default=5.0, description="Rapport signal/bruit minimal (dB)")
-    min_audio_duration: float = Field(default=0.5, description="Durée minimale d'un segment audio (secondes)")
+    min_audio_duration: float = Field(default=1.5, description="Durée minimale d'un segment audio (secondes)")
     max_audio_duration: float = Field(default=20.0, description="Durée maximale d'un segment audio (secondes)")
+    normalize_loudness: bool = Field(default=True, description="Normaliser le volume crête audio")
+    target_peak_db: float = Field(default=-1.0, description="Volume crête cible en dBFS")
+    highpass_cutoff: int = Field(default=70, description="Fréquence de coupure du filtre passe-haut en Hz")
     enable_yamnet: bool = Field(default=True, description="Activer la détection de musique YAMNet si TensorFlow est présent")
 
     # Paramètres Nettoyage Texte

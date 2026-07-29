@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union, Tuple
 from pydub import AudioSegment
 from pydub.silence import split_on_silence
+from pydub.effects import normalize as pydub_normalize, high_pass_filter as pydub_high_pass_filter
 import webrtcvad
 
 logger = logging.getLogger("waxal_asr_pipeline")
@@ -23,7 +24,7 @@ except ImportError:
 
 
 class AudioProcessor:
-    """Gestionnaire complet du prétraitement audio (formatage, VAD, SNR, détection musique, découpage)."""
+    """Gestionnaire complet du prétraitement audio (formatage, VAD, SNR, détection musique, filtrage, normalisation)."""
 
     def __init__(
         self,
@@ -33,8 +34,11 @@ class AudioProcessor:
         silence_thresh: int = -40,
         vad_mode: int = 3,
         min_snr_db: float = 5.0,
-        min_audio_duration: float = 0.5,
+        min_audio_duration: float = 1.5,
         max_audio_duration: float = 20.0,
+        normalize_loudness: bool = True,
+        target_peak_db: float = -1.0,
+        highpass_cutoff: int = 70,
         enable_yamnet: bool = True,
     ):
         """Initialise le processeur audio avec les paramètres configurés.
@@ -48,6 +52,9 @@ class AudioProcessor:
             min_snr_db: Rapport signal/bruit minimal (dB).
             min_audio_duration: Durée minimale des segments autorisés (s).
             max_audio_duration: Durée maximale des segments autorisés (s).
+            normalize_loudness: Activer la normalisation du volume crête audio.
+            target_peak_db: Volume crête cible en dBFS (ex: -1.0 dB).
+            highpass_cutoff: Fréquence de coupure du filtre passe-haut (Hz).
             enable_yamnet: Activer la détection de musique YAMNet si disponible.
         """
         self.sample_rate = sample_rate
@@ -58,6 +65,9 @@ class AudioProcessor:
         self.min_snr_db = min_snr_db
         self.min_audio_duration = min_audio_duration
         self.max_audio_duration = max_audio_duration
+        self.normalize_loudness = normalize_loudness
+        self.target_peak_db = target_peak_db
+        self.highpass_cutoff = highpass_cutoff
         self.enable_yamnet = enable_yamnet and TF_HUB_AVAILABLE
 
         # VAD Initialisation
@@ -80,7 +90,7 @@ class AudioProcessor:
             audio_input: Chemin de fichier, octets bruts, ou dictionnaire Hugging Face audio {"array", "sampling_rate"}.
 
         Returns:
-            pydub.AudioSegment au format cible (16kHz Mono).
+            pydub.AudioSegment au format cible (16kHz Mono) filtré et normalisé.
         """
         # Vérification si l'entrée est un dictionnaire ou un objet décodeur audio (ex: AudioDecoder avec torchcodec)
         is_audio_dict = isinstance(audio_input, dict) and "array" in audio_input
@@ -127,6 +137,21 @@ class AudioProcessor:
         # Application de la fréquence d'échantillonnage et des canaux cibles
         if segment.frame_rate != self.sample_rate or segment.channels != self.channels:
             segment = segment.set_frame_rate(self.sample_rate).set_channels(self.channels)
+
+        # Application du filtre passe-haut pour éliminer les rumbles basse fréquence (< highpass_cutoff Hz)
+        if self.highpass_cutoff > 0 and len(segment) > 0:
+            try:
+                segment = pydub_high_pass_filter(segment, self.highpass_cutoff)
+            except Exception as e:
+                logger.warning(f"Impossible d'appliquer le filtre passe-haut ({e})")
+
+        # Normalisation de l'intensité sonore au volume crête cible
+        if self.normalize_loudness and len(segment) > 0 and segment.max_dBFS != float("-inf"):
+            try:
+                headroom = abs(self.target_peak_db)
+                segment = pydub_normalize(segment, headroom=headroom)
+            except Exception as e:
+                logger.warning(f"Impossible d'appliquer la normalisation d'intensité ({e})")
 
         return segment
 
@@ -256,76 +281,65 @@ class AudioProcessor:
             audio_input: Fichier, octets, ou dictionnaire audio HF.
             raw_text: Transcription associée.
             text_cleaner_fn: Fonction de nettoyage textuel.
-            output_audio_dir: Dossier d'enregistrement des fichiers WAV segmentés.
+            output_audio_dir: Dossier d'enregistrement des fichiers WAV.
             speaker_id: Identifiant du locuteur.
 
         Returns:
             Liste de dictionnaires contenant les métadonnées des segments valides.
         """
-        results = []
         try:
             # 1. Nettoyage initial du texte
             clean_text = text_cleaner_fn(raw_text)
-            if not clean_text:
+            if not clean_text or not clean_text.strip():
                 return []
 
             # 2. Conversion audio vers 16kHz Mono WAV
             segment = self.convert_audio(audio_input)
-            total_duration = len(segment) / 1000.0
+            duration = len(segment) / 1000.0
 
-            # 3. Découpage éventuel par silence si le fichier est long (> 15s)
-            if total_duration > 15.0:
-                audio_chunks = self.split_audio(segment)
-            else:
-                audio_chunks = [segment]
+            # 3. Filtrage immédiat sur la durée minimale et maximale du fichier entier
+            if duration < self.min_audio_duration or duration > self.max_audio_duration:
+                return []
 
-            # 4. Filtrage et sauvegarde de chaque morceau
-            for chunk in audio_chunks:
-                duration = len(chunk) / 1000.0
-                if duration < self.min_audio_duration or duration > self.max_audio_duration:
-                    continue
+            # 4. Calcul du SNR (rapport signal/bruit)
+            snr_db = self.compute_snr(segment)
+            if snr_db < self.min_snr_db:
+                return []
 
-                # Calcul du SNR
-                snr_db = self.compute_snr(chunk)
-                if snr_db < self.min_snr_db:
-                    continue
+            # 5. VAD Filter (minimum 35% de trames de voix humaine)
+            voiced_ratio = self.vad_filter(segment)
+            if voiced_ratio < 0.35:
+                return []
 
-                # VAD Filter (minimum 40% de trames de parole)
-                voiced_ratio = self.vad_filter(chunk)
-                if voiced_ratio < 0.35:
-                    continue
+            # 6. Détection de musique (si YAMNet configuré)
+            if self.detect_music(segment):
+                return []
 
-                # Détection de musique (si configurée)
-                if self.detect_music(chunk):
-                    continue
+            # 7. Génération d'un nom de fichier unique UUID et sauvegarde
+            segment_id = f"waxal_asr_{uuid.uuid4().hex}"
+            filename = f"{segment_id}.wav"
+            filepath = output_audio_dir / filename
 
-                # Génération d'un nom de fichier unique UUID
-                segment_id = f"waxal_asr_{uuid.uuid4().hex}"
-                filename = f"{segment_id}.wav"
-                filepath = output_audio_dir / filename
+            # Enregistrement du fichier WAV PCM 16-bit
+            segment.export(str(filepath), format="wav")
 
-                # Enregistrement du fichier WAV PCM 16-bit
-                chunk.export(str(filepath), format="wav")
+            # Extraction du nombre de mots
+            words = clean_text.split()
 
-                # Extraction des mots pour métadonnées
-                words = clean_text.split()
-
-                results.append(
-                    {
-                        "segment_id": segment_id,
-                        "audio_filepath": str(filepath),
-                        "duration": round(duration, 3),
-                        "snr_db": round(snr_db, 2),
-                        "vad_ratio": round(voiced_ratio, 2),
-                        "text_raw": raw_text,
-                        "text_clean": clean_text,
-                        "word_count": len(words),
-                        "speaker_id": speaker_id,
-                    }
-                )
+            return [
+                {
+                    "segment_id": segment_id,
+                    "audio_filepath": str(filepath),
+                    "duration": round(duration, 3),
+                    "snr_db": round(snr_db, 2),
+                    "vad_ratio": round(voiced_ratio, 2),
+                    "text_raw": raw_text,
+                    "text_clean": clean_text,
+                    "word_count": len(words),
+                    "speaker_id": speaker_id,
+                }
+            ]
 
         except Exception as e:
             logger.error(f"Erreur lors du traitement d'un fichier audio: {e}", exc_info=False)
             return []
-
-        return results

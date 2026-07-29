@@ -1,5 +1,6 @@
 """Module de nettoyage et normalisation textuelle multilingue (avec support pour les langues africaines)."""
 import re
+import html
 import unicodedata
 from typing import Optional
 
@@ -20,6 +21,7 @@ class TextCleaner:
         # Supprime la ponctuation inutile mais garde les espaces et tirets entre mots
         self.punct_pattern = re.compile(r"[^\w\s\-\'ɛɔŋáéíóúàèìòùâêîôûãẽĩõũäëïöüñ]")
         self.multi_space_pattern = re.compile(r"\s+")
+        self.control_chars_pattern = re.compile(r"[\x00-\x1f\x7f-\x9f\u200b-\u200d\ufeff]")
 
     def clean(self, text: str) -> Optional[str]:
         """Nettoie et normalise une chaîne de texte.
@@ -33,13 +35,19 @@ class TextCleaner:
         if not text or not isinstance(text, str):
             return None
 
-        # 1. Normalisation Unicode (NFC)
-        cleaned = unicodedata.normalize("NFC", text)
+        # 1. Décodage des entités HTML (ex: &quot;, &amp;)
+        cleaned = html.unescape(text)
 
-        # 2. Suppression des balises de métadonnées [rires], (silence), etc.
+        # 2. Suppression des caractères de contrôle invisibles
+        cleaned = self.control_chars_pattern.sub("", cleaned)
+
+        # 3. Normalisation Unicode (NFC)
+        cleaned = unicodedata.normalize("NFC", cleaned)
+
+        # 4. Suppression des balises de métadonnées [rires], (silence), etc.
         cleaned = self.meta_pattern.sub(" ", cleaned)
 
-        # 3. Conversion en minuscules
+        # 5. Conversion en minuscules
         cleaned = cleaned.lower()
 
         # 4. Suppression de la ponctuation hors caractères autorisés
