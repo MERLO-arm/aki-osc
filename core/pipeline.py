@@ -11,11 +11,12 @@ from typing import Dict, List, Set, Optional, Tuple
 from multiprocessing import Pool
 from datasets import load_dataset
 from tqdm import tqdm
+import tarfile
 
 from config.settings import PipelineSettings
-from src.audio_processor import AudioProcessor
-from src.text_cleaner import TextCleaner
-from src.utils import ensure_dirs
+from core.audio_processor import AudioProcessor
+from core.text_cleaner import TextCleaner
+from core.utils import ensure_dirs
 
 logger = logging.getLogger("waxal_asr_pipeline")
 
@@ -115,27 +116,30 @@ class Pipeline:
         if resume:
             self.load_checkpoint()
 
-        logger.info(f"Chargement du jeu de données Hugging Face: {self.settings.hf_dataset_name} "
-                    f"(config: {self.settings.hf_config_name}) en mode streaming...")
+        logger.info(f"Chargement du jeu de données...")
 
-        # Chargement streaming Hugging Face
-        try:
-            if self.settings.hf_config_name:
-                ds = load_dataset(
-                    self.settings.hf_dataset_name,
-                    self.settings.hf_config_name,
-                    split="train",
-                    streaming=True,
-                )
-            else:
-                ds = load_dataset(
-                    self.settings.hf_dataset_name,
-                    split="train",
-                    streaming=True,
-                )
-        except Exception as e:
-            logger.error(f"Impossible de charger le dataset Hugging Face: {e}")
-            raise
+        if self.settings.local_tar:
+            # Mode dataset local
+            ds = self._load_local_dataset()
+        else:
+            # Chargement streaming Hugging Face
+            try:
+                if self.settings.hf_config_name:
+                    ds = load_dataset(
+                        self.settings.hf_dataset_name,
+                        self.settings.hf_config_name,
+                        split="train",
+                        streaming=True,
+                    )
+                else:
+                    ds = load_dataset(
+                        self.settings.hf_dataset_name,
+                        split="train",
+                        streaming=True,
+                    )
+            except Exception as e:
+                logger.error(f"Impossible de charger le dataset Hugging Face: {e}")
+                raise
 
         settings_dict = self.settings.model_dump() if hasattr(self.settings, "model_dump") else self.settings.dict()
 
@@ -174,7 +178,7 @@ class Pipeline:
                     continue
 
                 # Décode l'audio dans le processus principal pour éviter les erreurs de sérialisation multiprocessing
-                if not isinstance(audio_data, dict):
+                if not isinstance(audio_data, (dict, str, Path)):
                     try:
                         audio_data = {
                             "array": audio_data["array"],
@@ -217,6 +221,54 @@ class Pipeline:
 
         logger.info("Traitement par lots terminé. Génération des splits et du manifest final...")
         self._finalize_dataset(sample_counter)
+
+    def _load_local_dataset(self):
+        """Extrait l'archive locale si nécessaire et retourne un générateur d'éléments."""
+        raw_dir = self.output_dir / "raw"
+        tar_path = Path(self.settings.local_tar)
+
+        if not tar_path.exists():
+            raise FileNotFoundError(f"Archive locale introuvable: {tar_path}")
+
+        # On extrait si ce n'est pas déjà fait
+        if not raw_dir.exists() or not any(raw_dir.iterdir()):
+            logger.info(f"Extraction de l'archive {tar_path} dans {raw_dir}...")
+            raw_dir.mkdir(parents=True, exist_ok=True)
+            with tarfile.open(tar_path, "r:gz") as tar:
+                tar.extractall(path=raw_dir)
+
+        # Recherche dynamique du fichier TSV
+        tsv_paths = list(raw_dir.rglob(self.settings.local_tsv_file))
+        if not tsv_paths:
+            raise ValueError(f"Fichier TSV '{self.settings.local_tsv_file}' introuvable dans {raw_dir}")
+        tsv_path = tsv_paths[0]
+        
+        audio_base_dir = tsv_path.parent / self.settings.local_audio_dir
+        if not audio_base_dir.exists():
+            logger.warning(f"Le dossier audio '{audio_base_dir}' n'existe pas. On va chercher les audios relativement à '{tsv_path.parent}'.")
+            audio_base_dir = tsv_path.parent
+
+        logger.info(f"Fichier de mapping trouvé : {tsv_path}")
+        df = pd.read_csv(tsv_path, sep="\t")
+
+        def local_generator():
+            for _, row in df.iterrows():
+                audio_filename = row.get("audio_filename")
+                sentence = row.get("sentence")
+                
+                if not audio_filename or pd.isna(audio_filename) or not sentence or pd.isna(sentence):
+                    continue
+                
+                audio_path = audio_base_dir / str(audio_filename)
+                
+                yield {
+                    "id": Path(audio_filename).stem,
+                    "text": str(sentence),
+                    "audio": str(audio_path),
+                    "speaker_id": "unknown"
+                }
+
+        return local_generator()
 
     def _write_batch_parquet(self, data: List[Dict], batch_idx: int) -> None:
         """Écrit une liste de métadonnées de segments dans un fichier Parquet temporaire."""

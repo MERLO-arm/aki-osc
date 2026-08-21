@@ -1,0 +1,88 @@
+# Support Technique
+
+## Problèmes courants — Mobile
+
+### Mon téléphone ne capte plus
+1. Vérifiez que le **mode avion** est désactivé
+2. Redémarrez votre téléphone
+3. Retirez et réinsérez la **carte SIM**
+4. Vérifiez la couverture réseau dans votre zone
+5. Testez la SIM dans un **autre téléphone** pour déterminer si le problème vient du téléphone ou de la SIM
+6. Contactez le **3901** si le problème persiste
+
+### Je ne peux pas passer d'appels
+- Vérifiez votre **solde** et que votre ligne n'est pas **suspendue**
+- Vérifiez que vous n'avez pas activé le **renvoi d'appels**
+- Essayez de passer un appel vers le **3900** (gratuit)
+- Si vous êtes à l'étranger, vérifiez que le **roaming** est activé
+
+### Je ne reçois pas mes SMS
+- Vérifiez que votre **mémoire de stockage** n'est pas pleine
+- Supprimez d'anciens messages
+- Vérifiez le **numéro du centre de messagerie** (Paramètres > Messages > Centre de messagerie)
+- Redémarrez votre téléphone
+
+### Ma messagerie vocale ne fonctionne pas
+- Composez le **888** pour accéder à votre messagerie
+- Si vous avez changé de téléphone, reconfigurez la messagerie en appelant le **888**
+- Vérifiez que le **renvoi d'appels sur non-réponse** est activé
+
+## Problèmes courants — Internet / Box
+
+### Ma box internet ne se connecte plus
+1. Vérifiez les **voyants** de la box :
+   - Voyant Power : doit être **vert fixe**
+   - Voyant Internet : doit être **vert fixe** (rouge = problème de connexion)
+   - Voyant Wi-Fi : doit être **vert fixe** (éteint = Wi-Fi désactivé)
+2. Redémarrez la box en la **débranchant 30 secondes**
+3. Vérifiez les **câbles** (Ethernet, fibre, téléphone)
+4. Si voyant Internet rouge : il peut y avoir une **panne de réseau** dans votre zone
+5. Lancez un **diagnostic** depuis l'espace client ou l'application
+
+### Mon Wi-Fi est lent
+- Rapprochez-vous de la box
+- Passez sur la **bande 5 GHz** (plus rapide, mais portée réduite)
+- Réduisez le nombre d'appareils connectés
+- Changez le **canal Wi-Fi** dans l'interface d'administration de la box (192.168.1.1)
+- Commandez un **répéteur Wi-Fi** (gratuit avec forfaits Confort et Premium)
+
+### Mon décodeur TV ne fonctionne pas
+1. Vérifiez que le décodeur est bien **branché** et **allumé**
+2. Vérifiez la connexion **HDMI** avec votre TV
+3. Sélectionnez la bonne **source HDMI** sur votre TV
+4. Redémarrez le décodeur
+5. Si l'image est saccadée, vérifiez votre **débit internet** (minimum 10 Mbit/s recommandé pour la TV)
+
+## Configuration APN (Accès Internet Mobile)
+
+### Android
+1. Paramètres > Réseau et Internet > Réseau mobile > Noms des points d'accès
+2. Ajoutez un nouvel APN avec les paramètres suivants :
+   - **Nom** : Orange Internet
+   - **APN** : orange
+   - **Type d'APN** : default,supl
+3. Enregistrez et sélectionnez cet APN
+
+### iPhone
+- L'APN est configuré **automatiquement** sur iPhone
+- Si ce n'est pas le cas : Réglages > Données cellulaires > Réseau de données cellulaires
+- Entrez `orange` dans le champ APN
+
+## Dépannage à distance
+- Nos techniciens peuvent effectuer un **diagnostic à distance** de votre ligne
+- Appelez le **3901** (assistance technique)
+- Un technicien peut être dépêché à votre domicile si nécessaire (intervention gratuite si le problème vient du réseau)
+
+## Intervention technicien à domicile
+| Situation | Coût |
+|---|---|
+| Problème réseau (côté opérateur) | Gratuit |
+| Installation fibre initiale | Gratuit |
+| Déplacement de la prise fibre | 89€ |
+| Problème lié à l'installation du client | 69€/heure |
+
+## Contact support technique
+- **Téléphone** : 3901 (assistance technique, du lundi au samedi 8h-20h)
+- **Chat en ligne** : disponible sur le site et l'application
+- **En magasin** : prenez rendez-vous en ligne pour un diagnostic
+- **Réseaux sociaux** : @assistance sur Twitter, Facebook Messenger

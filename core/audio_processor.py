@@ -296,33 +296,29 @@ class AudioProcessor:
                 logger.warning(f"[{input_name}] Audio rejeté : trop silencieux (RMS = {rms:.5f} < 0.001)")
                 return []
 
-            # 3. Découpage :
-            audio_chunks = []
+            # 3. Rognage des silences (Trimming) :
+            # Puisque 1 fichier = 1 phrase, nous ne coupons pas l'audio en plusieurs morceaux,
+            # nous rognons seulement le silence au début et à la fin.
+            start_ms = 0
+            end_ms = len(segment)
             use_librosa = False
 
             if self.use_rms_split:
                 try:
                     import librosa
                     intervals = librosa.effects.split(samples_float, top_db=20)
-                    librosa_chunks = []
-                    durations = []
-                    for start_idx, end_idx in intervals:
-                        start_ms = (start_idx / self.sample_rate) * 1000.0
-                        end_ms = (end_idx / self.sample_rate) * 1000.0
-                        dur = (end_ms - start_ms) / 1000.0
-                        librosa_chunks.append(segment[start_ms:end_ms])
-                        durations.append(dur)
-
-                    if not librosa_chunks:
-                        logger.info(f"[{input_name}] Librosa n'a trouvé aucun segment. Fallback vers pydub.")
-                    elif len(librosa_chunks) > 0 and (np.mean(durations) < 2.0 or sum(1 for d in durations if d < 2.0) / len(durations) > 0.5):
-                        logger.info(f"[{input_name}] Librosa a produit des segments trop courts (durée moyenne: {np.mean(durations):.2f}s). Fallback vers pydub.")
-                    else:
-                        audio_chunks = librosa_chunks
+                    if len(intervals) > 0:
+                        first_start_idx = intervals[0][0]
+                        last_end_idx = intervals[-1][1]
+                        
+                        start_ms = (first_start_idx / self.sample_rate) * 1000.0
+                        end_ms = (last_end_idx / self.sample_rate) * 1000.0
                         use_librosa = True
-                        logger.debug(f"[{input_name}] Découpage Librosa réussi : {len(audio_chunks)} segments.")
+                        logger.debug(f"[{input_name}] Rognage Librosa réussi : de {start_ms:.0f}ms à {end_ms:.0f}ms.")
+                    else:
+                        logger.info(f"[{input_name}] Librosa n'a trouvé aucun signal. Fallback vers pydub.")
                 except Exception as e:
-                    logger.warning(f"[{input_name}] Erreur lors du split librosa ({e}). Fallback vers pydub.")
+                    logger.warning(f"[{input_name}] Erreur lors du trim librosa ({e}). Fallback vers pydub.")
 
             if not use_librosa:
                 try:
@@ -333,17 +329,18 @@ class AudioProcessor:
                         silence_thresh=self.silence_threshold_dbfs,
                     )
                     if intervals:
-                        audio_chunks = []
-                        for start_ms, end_ms in intervals:
-                            start_padded = max(0, start_ms - 150)
-                            end_padded = min(len(segment), end_ms + 150)
-                            audio_chunks.append(segment[start_padded:end_padded])
-                        logger.debug(f"[{input_name}] Découpage pydub réussi : {len(audio_chunks)} segments.")
-                    else:
-                        audio_chunks = [segment]
+                        start_ms = intervals[0][0]
+                        end_ms = intervals[-1][1]
+                        logger.debug(f"[{input_name}] Rognage pydub réussi : de {start_ms:.0f}ms à {end_ms:.0f}ms.")
                 except Exception as e:
                     logger.warning(f"[{input_name}] Erreur lors de detect_nonsilent pydub ({e}). Utilisation du segment entier.")
-                    audio_chunks = [segment]
+            
+            # Ajout d'un petit padding de 150ms pour éviter les coupes trop sèches
+            start_padded = max(0, start_ms - 150)
+            end_padded = min(len(segment), end_ms + 150)
+            
+            chunk = segment[start_padded:end_padded]
+            audio_chunks = [chunk]
 
             # 4. Filtrer les segments par durée et qualité
             for chunk in audio_chunks:

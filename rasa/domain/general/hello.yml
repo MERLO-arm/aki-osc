@@ -1,0 +1,30 @@
+version: "3.1"
+
+responses:
+  utter_hello:
+    - text: "Hi there! Nice to meet you! I'm your telecom assistant. How can I help you today?"
+      metadata:
+        rephrase: True
+    - text: "Bonjour ! Ravi de vous accueillir ! Je suis votre assistant télécom. Comment puis-je vous aider ?"
+      metadata:
+        rephrase: True
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+
+  utter_cannot_handle:
+    - text: "I'm sorry, I am not equipped to help you with that."
+      metadata:
+        rephrase: True
+    - text: "Je suis désolé, je ne suis pas formé pour vous aider dans ce domaine."
+      metadata:
+        rephrase: True
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+
+actions:
+  - utter_cannot_handle
+  - action_send_fallback_email

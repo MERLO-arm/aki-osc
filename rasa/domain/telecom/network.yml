@@ -1,0 +1,77 @@
+version: "3.1"
+
+actions:
+  - action_report_issue
+
+slots:
+  issue_type:
+    type: text
+    mappings:
+      - type: from_llm
+  issue_location:
+    type: text
+    mappings:
+      - type: from_llm
+
+responses:
+  utter_ask_issue_type:
+    - text: "What kind of network issue are you experiencing?"
+      buttons:
+        - title: "📵 No signal"
+          payload: "/SetSlots(issue_type=no_signal)"
+        - title: "🐌 Slow internet"
+          payload: "/SetSlots(issue_type=slow_internet)"
+        - title: "📞 Calls dropping"
+          payload: "/SetSlots(issue_type=call_drops)"
+        - title: "📡 Wi-Fi not working"
+          payload: "/SetSlots(issue_type=wifi_issue)"
+    - text: "Quel type de problème réseau rencontrez-vous ?"
+      buttons:
+        - title: "📵 Pas de signal"
+          payload: "/SetSlots(issue_type=no_signal)"
+        - title: "🐌 Internet lent"
+          payload: "/SetSlots(issue_type=slow_internet)"
+        - title: "📞 Appels qui coupent"
+          payload: "/SetSlots(issue_type=call_drops)"
+        - title: "📡 Wi-Fi en panne"
+          payload: "/SetSlots(issue_type=wifi_issue)"
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+
+  utter_ask_issue_location:
+    - text: "Where are you experiencing this issue? Please provide your city or zip code."
+      metadata:
+        rephrase: True
+    - text: "Où rencontrez-vous ce problème ? Merci de préciser votre ville ou code postal."
+      metadata:
+        rephrase: True
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+
+  utter_issue_reported:
+    - text: |
+        ✅ Your issue has been reported:
+        - Type: {issue_type}
+        - Location: {issue_location}
+        - Reference: {ticket_id}
+        
+        We'll investigate and keep you updated. You can track your ticket via your account or by calling 3901.
+      metadata:
+        rephrase: True
+    - text: |
+        ✅ Votre signalement a été enregistré :
+        - Type : {issue_type}
+        - Localisation : {issue_location}
+        - Référence : {ticket_id}
+        
+        Nous allons enquêter et vous tenir informé. Vous pouvez suivre votre ticket via votre espace client ou en appelant le 3901.
+      metadata:
+        rephrase: True
+      condition:
+        - type: slot
+          name: user_language
+          value: fr

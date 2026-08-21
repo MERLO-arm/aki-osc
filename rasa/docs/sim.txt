@@ -1,0 +1,71 @@
+# Carte SIM
+
+## Types de cartes SIM
+
+| Type | Taille | Compatibilité |
+|---|---|---|
+| Standard SIM | 25 x 15 mm | Anciens téléphones |
+| Micro SIM | 15 x 12 mm | Téléphones 2012-2017 |
+| Nano SIM | 12,3 x 8,8 mm | Téléphones récents (iPhone, Samsung Galaxy) |
+| eSIM | Intégrée | iPhone XS+, Samsung S20+, Google Pixel 3+ |
+| Triple SIM | Prédécoupée | S'adapte aux 3 formats (standard, micro, nano) |
+
+## Activation d'une nouvelle SIM
+1. Insérez la carte SIM dans votre téléphone
+2. Allumez le téléphone
+3. Appelez le **3900** ou rendez-vous sur l'**espace client**
+4. Munissez-vous du **code d'activation** fourni avec la carte
+5. L'activation prend effet sous **4 heures maximum**
+6. Pendant l'activation, vous pouvez recevoir des appels mais pas en émettre
+
+## eSIM (SIM virtuelle)
+
+### Qu'est-ce qu'une eSIM ?
+L'eSIM est une SIM intégrée directement dans votre téléphone. Pas besoin de carte physique — vous recevez un **QR code** à scanner.
+
+### Comment activer une eSIM ?
+1. Vérifiez que votre téléphone est **compatible eSIM**
+2. Commandez l'eSIM dans l'**espace client** ou en magasin (10€)
+3. Vous recevez un **QR code** par email
+4. Sur votre téléphone : Paramètres > Réseau mobile > Ajouter un forfait > Scanner le QR code
+5. L'activation est **immédiate**
+
+### Avantages de l'eSIM
+- Pas de carte physique à perdre
+- Possibilité d'avoir **2 numéros** sur le même téléphone (double SIM)
+- Changement d'opérateur plus rapide
+- Plus écologique (pas de plastique)
+
+## Carte SIM perdue ou volée
+
+### Étapes à suivre immédiatement
+1. **Bloquez votre ligne** en appelant le **3900** (24h/24) ou via l'espace client
+2. Cela empêche toute utilisation frauduleuse de votre ligne
+3. Commandez une **nouvelle carte SIM** (10€ en ligne, gratuit en magasin avec assurance)
+4. Votre numéro de téléphone est **conservé**
+5. Déposez une **plainte** si la carte a été volée
+
+### Délai de remplacement
+- **En magasin** : nouvelle SIM activée sous 2 heures
+- **Par courrier** : réception sous 3 à 5 jours ouvrés
+- **eSIM** : activation immédiate
+
+## Code PIN et PUK
+
+### Code PIN
+- Code à 4 chiffres demandé à chaque allumage du téléphone
+- Code PIN par défaut : **0000** (à modifier immédiatement)
+- Après **3 erreurs**, la carte SIM est bloquée → il faut le code PUK
+
+### Code PUK
+- Code à 8 chiffres qui débloque la carte SIM
+- Disponible dans l'**espace client** > Ma ligne > Code PUK
+- Ou en appelant le **3900**
+- Après **10 erreurs PUK**, la carte SIM est **définitivement bloquée** → remplacement nécessaire
+
+## Changer de format de SIM
+- Si vous changez de téléphone et que le format SIM est différent :
+  1. Rendez-vous en **magasin** avec une pièce d'identité
+  2. Ou commandez un échange en ligne (10€)
+  3. Votre numéro et vos données sont conservés
+  4. L'ancienne SIM est automatiquement désactivée

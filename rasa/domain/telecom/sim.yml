@@ -1,0 +1,37 @@
+version: "3.1"
+
+actions:
+  - action_sim_problem
+
+slots:
+  sim_issue_type:
+    type: text
+    mappings:
+      - type: from_llm
+
+responses:
+  utter_ask_sim_issue_type:
+    - text: "What's the problem with your SIM card?"
+      buttons:
+        - title: "🔒 SIM blocked (need PUK)"
+          payload: "/SetSlots(sim_issue_type=blocked)"
+        - title: "📵 SIM lost or stolen"
+          payload: "/SetSlots(sim_issue_type=lost)"
+        - title: "🔄 Need a new SIM format"
+          payload: "/SetSlots(sim_issue_type=format_change)"
+        - title: "📱 Activate eSIM"
+          payload: "/SetSlots(sim_issue_type=esim)"
+    - text: "Quel est le problème avec votre carte SIM ?"
+      buttons:
+        - title: "🔒 SIM bloquée (code PUK)"
+          payload: "/SetSlots(sim_issue_type=blocked)"
+        - title: "📵 SIM perdue ou volée"
+          payload: "/SetSlots(sim_issue_type=lost)"
+        - title: "🔄 Changer de format SIM"
+          payload: "/SetSlots(sim_issue_type=format_change)"
+        - title: "📱 Activer une eSIM"
+          payload: "/SetSlots(sim_issue_type=esim)"
+      condition:
+        - type: slot
+          name: user_language
+          value: fr

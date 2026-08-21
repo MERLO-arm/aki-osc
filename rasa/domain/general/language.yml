@@ -1,0 +1,54 @@
+version: "3.1"
+
+slots:
+  user_language:
+    type: categorical
+    values: [fr, en]
+    initial_value: fr
+    mappings:
+      - type: from_llm
+
+responses:
+  utter_ask_user_language:
+    - text: "Which language do you prefer? / Quelle langue préférez-vous ?"
+      buttons:
+        - title: "🇫🇷 Français"
+          payload: "/SetSlots(user_language=fr)"
+        - title: "🇬🇧 English"
+          payload: "/SetSlots(user_language=en)"
+
+  utter_language_set:
+    - text: "Parfait, je continue en français ! 🇫🇷"
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+    - text: "Great, I'll continue in English! 🇬🇧"
+      condition:
+        - type: slot
+          name: user_language
+          value: en
+
+  utter_ask_still_there:
+    - text: "Allô ? Êtes-vous toujours là ?"
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+    - text: "Hello, are you still there?"
+      condition:
+        - type: slot
+          name: user_language
+          value: en
+
+  utter_hang_up:
+    - text: "Je n'entends plus rien, je raccroche. Au revoir !"
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+    - text: "I haven't heard anything for a while, I will hang up now. Goodbye!"
+      condition:
+        - type: slot
+          name: user_language
+          value: en

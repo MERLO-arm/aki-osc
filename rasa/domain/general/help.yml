@@ -1,0 +1,46 @@
+version: "3.1"
+
+slots:
+  example_questions:
+    type: text
+    initial_value: |
+      - What can you do?
+      - Connect me to a human
+      - Browse FAQs
+    mappings:
+      - type: controlled
+
+responses:
+  utter_what_can_you_do:
+    - text: |
+        I can help you with:
+        - 📱 Check your mobile plan and data usage
+        - 💰 View your bill and payment info
+        - 🌐 Report network issues
+        - 🔄 Change your plan
+        - 💳 SIM card problems (lost, blocked, eSIM)
+        - 🔧 Technical support
+        - 👤 Connect you to a human agent
+        - ❓ Answer your questions from our knowledge base
+      metadata:
+        rephrase: True
+    - text: "I can help with your plan, bills, network issues, SIM cards, technical support, or connect you to a human agent."
+      channel: "browser_audio"
+      metadata:
+        rephrase: True
+    - text: |
+        Je peux vous aider avec :
+        - 📱 Consulter votre forfait et consommation
+        - 💰 Voir votre facture et infos de paiement
+        - 🌐 Signaler un problème réseau
+        - 🔄 Changer de forfait
+        - 💳 Problèmes de carte SIM (perte, blocage, eSIM)
+        - 🔧 Support technique
+        - 👤 Vous mettre en contact avec un agent humain
+        - ❓ Répondre à vos questions depuis notre base de connaissances
+      metadata:
+        rephrase: True
+      condition:
+        - type: slot
+          name: user_language
+          value: fr

@@ -1,0 +1,61 @@
+version: "3.1"
+actions:
+  - "action_human_handoff"
+
+slots: 
+ confirm_human_handoff:
+    type: "categorical"
+    mappings:
+      - type: "from_llm"
+    values:
+      - "Yes"
+      - "No" 
+
+responses:
+  utter_ask_confirm_human_handoff:
+    - text: "Do you want to be connected to a human agent?"
+      buttons:
+        - payload: "/SetSlots(confirm_human_handoff=Yes)"
+          title: "Yes"
+        - payload: "/SetSlots(confirm_human_handoff=No)"
+          title: "No"
+    - text: "Would you like to be connected to a human agent?"
+      channel: "browser_audio"
+    - text: "Souhaitez-vous être mis en relation avec un agent humain ?"
+      buttons:
+        - payload: "/SetSlots(confirm_human_handoff=Yes)"
+          title: "Oui"
+        - payload: "/SetSlots(confirm_human_handoff=No)"
+          title: "Non"
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+
+  utter_transferring_to_human:
+    - text: "You will be transferred to a human agent in a few moments."
+    - text: "Vous allez être transféré à un agent humain dans quelques instants."
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+
+  utter_human_handoff_cancelled:
+    - text: "Ok, I understand you don't want to be connected to a human agent. Is there something else I can help you with?"
+      metadata:
+        rephrase: True
+    - text: "D'accord, je comprends. Y a-t-il autre chose que je puisse faire pour vous ?"
+      metadata:
+        rephrase: True
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+
+  utter_transfer_to_manager:
+    - text: "I will transfer the following summary of our conversation to the Callback Manager:\n{summary}"
+    - text: "Je transfère le résumé suivant de notre conversation au responsable :\n{summary}"
+      condition:
+        - type: slot
+          name: user_language
+          value: fr

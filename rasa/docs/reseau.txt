@@ -1,0 +1,76 @@
+# Réseau et Couverture
+
+## Couverture réseau
+
+### Technologies disponibles
+| Technologie | Couverture population | Vitesse max |
+|---|---|---|
+| 2G (GSM) | 99,8% | 0,2 Mbit/s |
+| 3G (UMTS) | 99,5% | 42 Mbit/s |
+| 4G (LTE) | 98% | 300 Mbit/s |
+| 4G+ (LTE-A) | 85% | 600 Mbit/s |
+| 5G | 60% | 2 Gbit/s |
+
+### Vérifier la couverture dans votre zone
+1. Rendez-vous sur notre **carte de couverture** en ligne
+2. Entrez votre **adresse** ou **code postal**
+3. La carte affiche la couverture disponible (2G, 3G, 4G, 5G)
+4. Les zones en vert indiquent une bonne couverture, en orange une couverture partielle
+
+## Problèmes de réseau courants
+
+### Pas de réseau / Pas de signal
+- Vérifiez que le **mode avion** est désactivé
+- Redémarrez votre téléphone
+- Retirez et réinsérez votre **carte SIM**
+- Vérifiez la **couverture réseau** dans votre zone
+- Si le problème persiste, contactez le **3900**
+
+### Internet mobile lent
+- Vérifiez votre **consommation de données** dans l'espace client
+- Si vous avez dépassé votre enveloppe, le débit est réduit à **1 Mbit/s**
+- Désactivez puis réactivez les **données mobiles**
+- Passez en mode réseau **4G/5G automatique** dans les paramètres
+- En zone dense (concert, stade), le réseau peut être temporairement saturé
+
+### Coupures intermittentes
+- Mettez à jour votre téléphone avec la **dernière version du système**
+- Réinitialisez les **paramètres réseau** (Paramètres > Général > Réinitialiser > Réglages réseau)
+- Vérifiez s'il y a une **panne en cours** dans votre zone sur notre site
+
+## Pannes réseau
+
+### Comment signaler une panne ?
+1. Consultez d'abord la **carte des incidents** sur le site ou l'application
+2. Si votre zone n'est pas affectée, appelez le **3901** (assistance technique)
+3. Précisez votre **localisation exacte** et les **symptômes** (pas de réseau, internet lent, appels qui coupent)
+4. Un technicien peut être dépêché si nécessaire
+
+### Délais de résolution
+| Type de panne | Délai moyen |
+|---|---|
+| Panne locale (antenne) | 4 à 24 heures |
+| Panne régionale | 2 à 8 heures |
+| Maintenance planifiée | Préavis de 48h, durée 2-4h |
+| Incident majeur | Communication en temps réel sur notre site |
+
+### Indemnisation
+- Si la panne dure plus de **24 heures**, vous pouvez demander une **indemnisation**
+- L'indemnisation est calculée au prorata de votre abonnement mensuel
+- Contactez le **3900** avec la **date et durée de la panne**
+
+## Réseau Wi-Fi (Box Internet)
+
+### Améliorer votre Wi-Fi
+- Placez la box au **centre de votre logement**, en hauteur
+- Éloignez-la des **murs épais**, **micro-ondes** et **miroirs**
+- Utilisez le **Wi-Fi 5 GHz** pour les appareils proches (plus rapide)
+- Utilisez le **Wi-Fi 2,4 GHz** pour les appareils éloignés (meilleure portée)
+- Commandez un **répéteur Wi-Fi** gratuit avec les forfaits Confort et Premium
+
+### Ma box ne se connecte plus
+1. Vérifiez que tous les **câbles** sont bien branchés
+2. Redémarrez la box en la **débranchant 30 secondes**
+3. Vérifiez les **voyants** : le voyant internet doit être vert fixe
+4. Si le voyant internet est rouge, il peut y avoir une panne ou un problème de ligne
+5. Contactez le **3901** pour un diagnostic à distance

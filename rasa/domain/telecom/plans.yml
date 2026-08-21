@@ -1,0 +1,47 @@
+version: "3.1"
+
+actions:
+  - action_check_plan
+
+slots:
+  phone_number:
+    type: text
+    mappings:
+      - type: from_llm
+
+responses:
+  utter_ask_phone_number:
+    - text: "Could you please provide your phone number so I can look up your account?"
+      metadata:
+        rephrase: True
+    - text: "Pourriez-vous me donner votre numéro de téléphone pour que je puisse accéder à votre compte ?"
+      metadata:
+        rephrase: True
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+
+  utter_plan_details:
+    - text: |
+        📱 **Your plan details:**
+        - Plan: {plan_name}
+        - Data used: {data_used} / {data_total}
+        - Calls: unlimited
+        - SMS: unlimited
+        - Next billing date: {next_billing_date}
+      metadata:
+        rephrase: True
+    - text: |
+        📱 **Détails de votre forfait :**
+        - Forfait : {plan_name}
+        - Data utilisée : {data_used} / {data_total}
+        - Appels : illimités
+        - SMS : illimités
+        - Prochaine facturation : {next_billing_date}
+      metadata:
+        rephrase: True
+      condition:
+        - type: slot
+          name: user_language
+          value: fr

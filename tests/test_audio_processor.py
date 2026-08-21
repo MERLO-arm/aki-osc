@@ -3,8 +3,8 @@ import numpy as np
 import pytest
 from pydub import AudioSegment
 
-from src.text_cleaner import TextCleaner
-from src.audio_processor import AudioProcessor
+from core.text_cleaner import TextCleaner
+from core.audio_processor import AudioProcessor
 
 
 class TestTextCleaner:

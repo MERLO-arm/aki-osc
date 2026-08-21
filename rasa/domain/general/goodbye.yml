@@ -1,0 +1,18 @@
+version: "3.1"
+
+responses:
+  utter_goodbye:
+    - text: "Thanks for stopping by — take care!"
+    - text: "Thanks for the chat. Have a great day!"
+    - text: "Catch you later! Feel free to reach out anytime."
+    - text: "Goodbye for now — we're here if you need anything."
+    - text: "Au revoir ! N'hésitez pas à revenir si vous avez d'autres questions. 👋"
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+    - text: "Merci pour cet échange. Bonne journée ! 😊"
+      condition:
+        - type: slot
+          name: user_language
+          value: fr

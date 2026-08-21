@@ -40,9 +40,14 @@ class PipelineSettings(BaseSettings):
     seed: int = Field(default=42, description="Graine aléatoire pour la reproductibilité")
 
     # Paramètres Hugging Face & Entrées/Sorties
-    hf_dataset_name: str = Field(default="google/waxal", description="Identifiant du jeu de données Hugging Face")
+    hf_dataset_name: Optional[str] = Field(default="google/waxal", description="Identifiant du jeu de données Hugging Face")
     hf_config_name: Optional[str] = Field(default="lin", description="Configuration / langue du jeu de données")
     output_dir: str = Field(default="./data", description="Dossier racine pour l'enregistrement des résultats")
+
+    # Paramètres Dataset Local (Archive Tar)
+    local_tar: Optional[str] = Field(default=None, description="Chemin vers une archive locale (.tar.gz)")
+    local_tsv_file: str = Field(default="Mapping_MP3.tsv", description="Nom du fichier de mapping TSV dans l'archive")
+    local_audio_dir: str = Field(default="audio_files_mp3", description="Nom du dossier contenant les audios dans l'archive")
 
     if PYDANTIC_V2:
         model_config = SettingsConfigDict(

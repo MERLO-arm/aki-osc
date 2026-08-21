@@ -1,0 +1,80 @@
+# Forfaits et Offres Mobile / Internet
+
+## Forfaits Mobile
+
+### Forfait Essentiel — 9,99€/mois
+- Appels illimités vers fixes et mobiles en France
+- SMS/MMS illimités
+- 20 Go de données mobiles en 4G
+- 5 Go utilisables en Europe/DOM
+- Engagement : sans engagement
+
+### Forfait Confort — 19,99€/mois
+- Appels illimités vers fixes et mobiles en France
+- SMS/MMS illimités
+- 80 Go de données mobiles en 4G/5G
+- 15 Go utilisables en Europe/DOM
+- Appels illimités vers fixes dans 30 pays
+- Engagement : sans engagement
+
+### Forfait Premium — 29,99€/mois
+- Appels illimités vers fixes et mobiles en France et Europe
+- SMS/MMS illimités
+- 150 Go de données mobiles en 5G
+- 30 Go utilisables en Europe/DOM
+- Appels illimités vers fixes et mobiles dans 50 pays
+- TV incluse : accès à 70 chaînes en streaming
+- Engagement : 12 mois (ou sans engagement à 34,99€/mois)
+
+### Forfait Famille
+- Remise de 5€/mois par ligne supplémentaire (à partir de la 2e ligne)
+- Chaque membre choisit son propre forfait
+- Facture unique pour toute la famille
+
+## Forfaits Internet / Fibre
+
+### Fibre Essentielle — 29,99€/mois
+- Débit descendant jusqu'à 500 Mbit/s
+- Débit montant jusqu'à 200 Mbit/s
+- Box Wi-Fi 5 incluse
+- Appels illimités vers les fixes en France
+
+### Fibre Confort — 39,99€/mois
+- Débit descendant jusqu'à 1 Gbit/s
+- Débit montant jusqu'à 500 Mbit/s
+- Box Wi-Fi 6 incluse
+- Appels illimités vers les fixes et mobiles en France
+- Décodeur TV inclus (140 chaînes)
+- Répéteur Wi-Fi offert
+
+### Fibre Premium — 49,99€/mois
+- Débit descendant jusqu'à 2 Gbit/s
+- Débit montant jusqu'à 800 Mbit/s
+- Box Wi-Fi 6E incluse
+- Appels illimités vers fixes et mobiles en France + 100 destinations
+- Décodeur TV 4K (200 chaînes + Netflix inclus)
+- 2 répéteurs Wi-Fi offerts
+
+## Options complémentaires
+
+| Option | Prix | Description |
+|---|---|---|
+| Data boost 10 Go | 5€/mois | 10 Go supplémentaires par mois |
+| Data boost 50 Go | 10€/mois | 50 Go supplémentaires par mois |
+| Assurance mobile | 7,99€/mois | Vol, casse, oxydation — remplacement sous 48h |
+| Multi-SIM | 5€/mois | 2e carte SIM avec le même numéro (tablette, montre) |
+| Roaming monde | 10€/jour | Data et appels dans 100+ pays hors Europe |
+| Cloud 100 Go | 2,99€/mois | Stockage cloud pour photos et documents |
+
+## Comment changer de forfait ?
+1. Connectez-vous à votre espace client sur le site ou l'application
+2. Allez dans « Mon forfait » > « Changer de forfait »
+3. Choisissez votre nouveau forfait
+4. La modification prend effet immédiatement ou au prochain cycle de facturation
+5. Vous pouvez aussi appeler le 3900 ou discuter avec notre assistant
+
+## Numéros utiles
+- **Service client** : 3900 (appel gratuit depuis votre ligne)
+- **Depuis l'étranger** : +33 1 XX XX XX XX
+- **Assistance technique** : 3901
+- **Service commercial** : 3900 puis choix 2

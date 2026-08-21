@@ -1,0 +1,26 @@
+version: "3.1"
+responses:
+  utter_welcome:
+    - text: "Bonjour ! Je suis Jumi, l'assistant télécom de Alo Telecom. Comment puis-je vous aider aujourd'hui ?"
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+    - text: "Hello! I am Jumi, the telecom virtual assistant of Alo Telecom. How can I help you today?"
+      condition:
+        - type: slot
+          name: user_language
+          value: en
+    - text: "Bonjour ! Je suis Jumi d'Alo Telecom. Comment puis-je vous aider ? / Hello! I am Jumi from Alo Telecom. How can I help you?"
+  
+  utter_help:
+    - text: "Comment puis-je vous aider ?"
+      metadata:
+        rephrase: True
+
+slots:
+  agent_name:
+    type: text
+    initial_value: "Jumi"
+    mappings:
+      - type: controlled

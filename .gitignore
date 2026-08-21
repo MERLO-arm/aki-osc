@@ -36,10 +36,12 @@ scratch/
 # Data and logs
 data/
 logs/
+outputs/
 *.parquet
 *.pkl
 *.wav
 *.mp3
+*.zip
 
 # Environment & IDE
 .env

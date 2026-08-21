@@ -1,0 +1,85 @@
+version: "3.1"
+
+actions:
+  - action_change_plan
+  - action_technical_support
+
+slots:
+  desired_plan:
+    type: text
+    mappings:
+      - type: from_llm
+  confirm_change_plan:
+    type: categorical
+    values: ["Yes", "No"]
+    mappings:
+      - type: from_llm
+  tech_issue_description:
+    type: text
+    mappings:
+      - type: from_llm
+
+responses:
+  utter_ask_desired_plan:
+    - text: |
+        Which plan would you like to switch to?
+        
+        - **Essentiel** — 9,99€/mois (20 Go, appels illimités)
+        - **Confort** — 19,99€/mois (80 Go 4G/5G, appels illimités)
+        - **Premium** — 29,99€/mois (150 Go 5G, TV incluse)
+      metadata:
+        rephrase: True
+    - text: |
+        Vers quel forfait souhaitez-vous basculer ?
+        
+        - **Essentiel** — 9,99€/mois (20 Go, appels illimités)
+        - **Confort** — 19,99€/mois (80 Go 4G/5G, appels illimités)
+        - **Premium** — 29,99€/mois (150 Go 5G, TV incluse)
+      metadata:
+        rephrase: True
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+
+  utter_ask_confirm_change_plan:
+    - text: "You want to switch to the **{desired_plan}** plan. Do you confirm this change?"
+      buttons:
+        - title: "✅ Yes, confirm"
+          payload: "/SetSlots(confirm_change_plan=Yes)"
+        - title: "❌ No, cancel"
+          payload: "/SetSlots(confirm_change_plan=No)"
+    - text: "Vous souhaitez passer au forfait **{desired_plan}**. Confirmez-vous ce changement ?"
+      buttons:
+        - title: "✅ Oui, confirmer"
+          payload: "/SetSlots(confirm_change_plan=Yes)"
+        - title: "❌ Non, annuler"
+          payload: "/SetSlots(confirm_change_plan=No)"
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+
+  utter_change_plan_cancelled:
+    - text: "No worries, your plan remains unchanged. Is there anything else I can help with?"
+      metadata:
+        rephrase: True
+    - text: "Pas de souci, votre forfait reste inchangé. Puis-je vous aider pour autre chose ?"
+      metadata:
+        rephrase: True
+      condition:
+        - type: slot
+          name: user_language
+          value: fr
+
+  utter_ask_tech_issue_description:
+    - text: "Please describe the technical issue you're experiencing in detail."
+      metadata:
+        rephrase: True
+    - text: "Veuillez décrire en détail le problème technique que vous rencontrez."
+      metadata:
+        rephrase: True
+      condition:
+        - type: slot
+          name: user_language
+          value: fr

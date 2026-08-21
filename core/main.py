@@ -8,8 +8,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from config.settings import get_settings
-from src.utils import setup_logging
-from src.pipeline import Pipeline
+from core.utils import setup_logging
+from core.pipeline import Pipeline
 
 
 def main():
@@ -47,6 +47,24 @@ def main():
         help="Taille des lots de traitement et d'écriture Parquet",
     )
     parser.add_argument(
+        "--local_tar",
+        type=str,
+        default=None,
+        help="Chemin vers une archive locale (.tar.gz) à utiliser au lieu de Hugging Face",
+    )
+    parser.add_argument(
+        "--local_tsv",
+        type=str,
+        default="Mapping_MP3.tsv",
+        help="Nom du fichier TSV de mapping dans l'archive",
+    )
+    parser.add_argument(
+        "--local_audio_dir",
+        type=str,
+        default="audio_files_mp3",
+        help="Nom du dossier contenant les audios dans l'archive",
+    )
+    parser.add_argument(
         "--max_samples",
         type=int,
         default=None,
@@ -69,6 +87,9 @@ def main():
         hf_config_name=args.config_name,
         num_workers=args.num_workers,
         batch_size=args.batch_size,
+        local_tar=args.local_tar,
+        local_tsv_file=args.local_tsv,
+        local_audio_dir=args.local_audio_dir,
     )
 
     # Configuration des logs
@@ -76,7 +97,10 @@ def main():
     logger = setup_logging(log_dir=log_dir, level=logging.INFO)
     logger.info("=== Démarrage du Pipeline ASR Multilingue (WAXAL) ===")
     logger.info(f"Dossier de sortie : {settings.output_dir}")
-    logger.info(f"Dataset HF : {settings.hf_dataset_name} ({settings.hf_config_name})")
+    if settings.local_tar:
+        logger.info(f"Dataset Local : {settings.local_tar}")
+    else:
+        logger.info(f"Dataset HF : {settings.hf_dataset_name} ({settings.hf_config_name})")
     logger.info(f"Nombre de workers : {settings.num_workers}")
     if args.max_samples:
         logger.info(f"Échantillons max : {args.max_samples}")

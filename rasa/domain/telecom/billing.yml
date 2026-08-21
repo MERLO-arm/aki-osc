@@ -1,0 +1,31 @@
+version: "3.1"
+
+actions:
+  - action_check_bill
+
+responses:
+  utter_bill_details:
+    - text: |
+        💰 **Your bill summary:**
+        - Billing period: {billing_period}
+        - Plan charges: {plan_charges}€
+        - Extra charges: {extra_charges}€
+        - **Total: {total_amount}€**
+        - Payment status: {payment_status}
+        - Payment method: {payment_method}
+      metadata:
+        rephrase: True
+    - text: |
+        💰 **Résumé de votre facture :**
+        - Période de facturation : {billing_period}
+        - Frais d'abonnement : {plan_charges}€
+        - Frais supplémentaires : {extra_charges}€
+        - **Total : {total_amount}€**
+        - Statut du paiement : {payment_status}
+        - Mode de paiement : {payment_method}
+      metadata:
+        rephrase: True
+      condition:
+        - type: slot
+          name: user_language
+          value: fr

@@ -1,0 +1,30 @@
+version: "3.1"
+
+responses:
+  utter_top_faqs:
+    - text: |
+        Here are some popular questions you can ask me:
+        
+        - 📱 What mobile plans do you offer?
+        - 💰 How do I check my bill?
+        - 🌐 How do I check network coverage in my area?
+        - 💳 What should I do if I lost my SIM card?
+        - 🔧 My internet is not working, what should I do?
+        - 📞 How do I change my plan?
+      metadata:
+        rephrase: True
+    - text: |
+        Voici quelques questions fréquentes :
+        
+        - 📱 Quels forfaits mobiles proposez-vous ?
+        - 💰 Comment consulter ma facture ?
+        - 🌐 Comment vérifier la couverture réseau dans ma zone ?
+        - 💳 Que faire si j'ai perdu ma carte SIM ?
+        - 🔧 Mon internet ne fonctionne plus, que faire ?
+        - 📞 Comment changer de forfait ?
+      metadata:
+        rephrase: True
+      condition:
+        - type: slot
+          name: user_language
+          value: fr

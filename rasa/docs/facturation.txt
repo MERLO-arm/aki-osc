@@ -1,0 +1,55 @@
+# Facturation et Paiement
+
+## Comprendre votre facture
+
+Votre facture est émise chaque mois et comprend :
+- **Abonnement mensuel** : le montant fixe de votre forfait
+- **Consommations hors forfait** : appels, SMS ou data au-delà de votre enveloppe incluse
+- **Options souscrites** : assurance, data boost, multi-SIM, etc.
+- **Frais ponctuels** : activation de ligne, changement de SIM, frais de résiliation
+- **Taxes** : TVA applicable (20% en métropole)
+
+## Date de facturation
+- Votre facture est générée le **5 de chaque mois**
+- Elle couvre la période du 1er au dernier jour du mois précédent
+- Le prélèvement est effectué le **10 du mois**
+
+## Modes de paiement acceptés
+
+| Mode | Détails |
+|---|---|
+| Prélèvement automatique | Recommandé — débité le 10 du mois |
+| Carte bancaire | Visa, Mastercard, American Express |
+| Virement bancaire | IBAN fourni sur la facture |
+| Chèque | À envoyer à l'adresse indiquée sur la facture |
+| Paiement en magasin | Dans tous nos points de vente |
+
+## Consulter vos factures
+1. Connectez-vous à votre **espace client** (site web ou application)
+2. Allez dans « **Mes factures** »
+3. Cliquez sur la facture souhaitée pour la télécharger en PDF
+4. Les 24 dernières factures sont disponibles en ligne
+
+## Que faire en cas de facture élevée ?
+- Vérifiez vos **consommations hors forfait** dans l'espace client
+- Consultez les **appels vers des numéros surtaxés** (commençant par 08)
+- Vérifiez si vous avez utilisé votre téléphone à l'**étranger** sans option roaming
+- En cas de doute, contactez le service client au **3900**
+
+## Contester une facture
+1. Appelez le **3900** ou utilisez le chat en ligne
+2. Fournissez votre **numéro de ligne** et la **référence de la facture**
+3. Expliquez le motif de la contestation
+4. Un conseiller examinera votre dossier sous **48 heures ouvrées**
+5. Si la contestation est acceptée, un avoir sera appliqué sur la prochaine facture
+
+## Difficultés de paiement
+- Contactez-nous **avant la date d'échéance** au 3900
+- Un **échelonnement de paiement** peut être mis en place
+- En cas de non-paiement, la ligne peut être **suspendue** après 15 jours
+- La ligne est **résiliée** après 60 jours de non-paiement
+
+## Remboursements
+- Les remboursements sont effectués par **virement bancaire** ou **avoir sur facture**
+- Délai de traitement : **5 à 10 jours ouvrés**
+- Pour les achats en magasin, le remboursement se fait sur le **même moyen de paiement**

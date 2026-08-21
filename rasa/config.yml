@@ -1,0 +1,25 @@
+recipe: default.v1
+language: fr
+assistant_id: roaring-helo
+
+pipeline:
+  - name: SingleStepLLMCommandGenerator
+    prompt_template: prompts/intent_detection_prompt.jinja2
+    llm:
+      model_group: groq-llama-3-3
+    flow_retrieval:
+      active: false
+
+policies:
+  - name: FlowPolicy
+  - name: EnterpriseSearchPolicy
+    vector_store:
+      type: faiss
+      source: ./docs
+      threshold: 0.5
+    llm:
+      model_group: groq-llama-3-fast
+    prompt_template: prompts/enterprise_search_prompt.jinja2
+    embeddings:
+      model_group: free-embeddings
+    check_relevancy: true

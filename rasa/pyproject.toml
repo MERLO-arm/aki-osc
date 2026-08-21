@@ -1,0 +1,16 @@
+[project]
+name = "rasa-agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "rasa-pro>=3.16.6",
+]
+
+[project.scripts]
+rasa-agent = "rasa_agent:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
